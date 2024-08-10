@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #9face6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #messages {
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        #messages p {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f7f7f7;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        #messages p strong {
+            color: #3498db;
+        }
+
+        #messages p em {
+            font-size: 12px;
+            color: #888;
+            float: right;
+        }
+
+        form {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            #messages {
+                height: 300px;
+            }
+
+            input[type="text"], button {
+                padding: 12px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Room</h1>
+    <div id="messages"></div>
+    <form id="messageForm">
+        <input type="text" id="content" placeholder="Type your message here..." required>
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+	    function formatTimestamp(timestamp) {
+	        const date = new Date(timestamp);
+	        const options = {
+	            year: 'numeric',
+	            month: 'short',
+	            day: 'numeric',
+	            hour: '2-digit',
+	            minute: '2-digit',
+	        };
+	        return date.toLocaleDateString(undefined, options);
+	    }
+
+	    function fetchMessages() {
+	        fetch('sendMessage')
+	            .then(response => response.json())
+	            .then(data => {
+	                const messagesDiv = document.getElementById('messages');
+	                messagesDiv.innerHTML = '';
+	                data.forEach(msg => {
+	                    const formattedTimestamp = formatTimestamp(msg.timestamp);
+	                    messagesDiv.innerHTML += `<p><strong>${msg.sender}:</strong> ${msg.content} <em>${formattedTimestamp}</em></p>`;
+	                });
+	            });
+	    }
+	
+	    document.getElementById('messageForm').addEventListener('submit', function(e) {
+	        e.preventDefault();
+	        const content = document.getElementById('content').value;
+	
+	        fetch('sendMessage', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/x-www-form-urlencoded',
+	            },
+	            body: `content=${content}`
+	        }).then(() => {
+	            document.getElementById('content').value = '';
+	            fetchMessages();
+	        });
+	    });
+	
+	    fetchMessages();
+	    setInterval(fetchMessages, 3000);
+	</script>
+
+</body>
+</html>
